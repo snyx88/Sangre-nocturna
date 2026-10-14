@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#04070f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link id="dynamicFavicon" rel="icon" type="image/png" href="icon.svg">
+<title>Szeth · Sangre Nocturna</title>
+<style>
+:root {
+  --bg: #04070f;
+  --surface: #0a1120;
+  --surface-2: #101c33;
+  --border: #1d2f50;
+  --cyan: #00e5ff;
+  --silver: #f1f5f9;
+  --muted: #8298ba;
+  --emerald: #10b981;
+  --amber: #f59e0b;
+  --rose: #f43f5e;
+  --violet: #a855f7;
+  --radius: 16px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--silver);
+  font: 14px/1.45 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 84px;
+  overflow-x: hidden;
+}
+button, input, select { font: inherit; color: inherit; }
+button {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--silver);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+button:active:not(:disabled) { transform: scale(0.97); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-cyan {
+  background: linear-gradient(135deg, #00b4d8, #0284c7);
+  border: 1px solid var(--cyan);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(0, 229, 255, 0.25);
+}
+.btn-emerald { background: rgba(16, 185, 129, 0.18); border-color: var(--emerald); color: #6ee7b7; }
+.btn-rose { background: rgba(244, 63, 94, 0.15); border-color: var(--rose); color: #fda4af; }
+.btn-ghost { background: rgba(255,255,255,0.03); border-color: var(--border); color: var(--muted); }
+.btn-sm { padding: 5px 9px; font-size: 11.5px; border-radius: 8px; }
+
+.shell { max-width: 680px; margin: 0 auto; padding: 10px 14px; }
+
+/* 1. COMPACT TOP HUD BAR (SOLVES THE "FOOTER" LOOK) */
+.hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(10, 17, 32, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+.hud-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.lvl-Orb {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  color: #04070f;
+  font-weight: 900;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.rank-info { min-width: 0; }
+.rank-name {
+  font-weight: 800;
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-xp {
+  width: 90px;
+  height: 4px;
+  background: #172540;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+.mini-xp > i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  transition: width 0.3s;
+}
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.hud-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 800;
+  background: #060b16;
+  border: 1px solid var(--border);
+}
+
+/* 2. EL ALTAR DE SANGRE NOCTURNA (DUOLINGO-STYLE EVOLVING HERO) */
+.altar {
+  position: relative;
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.4s ease;
+}
+/* 5 Estados visuales del Altar */
+.altar.stage-0 { background: radial-gradient(circle at 22% 50%, rgba(100, 116, 139, 0.22) 0%, #070c18 75%); border-color: #293548; }
+.altar.stage-1 { background: radial-gradient(circle at 22% 50%, rgba(244, 63, 94, 0.28) 0%, rgba(245, 158, 11, 0.12) 45%, #070c18 80%); border-color: rgba(244, 63, 94, 0.55); }
+.altar.stage-2 { background: radial-gradient(circle at 22% 50%, rgba(0, 229, 255, 0.35) 0%, #070c18 75%); border-color: rgba(0, 229, 255, 0.55); box-shadow: 0 10px 30px rgba(0, 229, 255, 0.12); }
+.altar.stage-3 { background: radial-gradient(circle at 22% 50%, rgba(16, 185, 129, 0.38) 0%, rgba(0, 229, 255, 0.22) 45%, #070c18 80%); border-color: rgba(16, 185, 129, 0.6); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.16); }
+.altar.stage-4 { background: radial-gradient(circle at 22% 50%, rgba(168, 85, 247, 0.48) 0%, rgba(0, 229, 255, 0.3) 48%, #070c18 85%); border-color: rgba(168, 85, 247, 0.75); box-shadow: 0 12px 36px rgba(168, 85, 247, 0.25); }
+
+.relic-frame {
+  width: 82px;
+  height: 82px;
+  border-radius: 22px;
+  background: #04070f;
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.65);
+}
+.relic-frame canvas {
+  width: 78px;
+  height: 78px;
+  border-radius: 20px;
+}
+.altar-body { flex: 1; min-width: 0; }
+.altar-eyebrow {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.altar-title {
+  margin: 2px 0 4px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+.speech-bubble {
+  background: rgba(4, 7, 15, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 12px;
+  color: #cbd5e1;
+  font-style: italic;
+}
+
+/* 3. TWIN PILLARS (ALWAYS 2 COLUMNS, EVEN ON ANDROID) */
+.twin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.stat-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.stat-box.lit-cyan { border-color: rgba(0, 229, 255, 0.5); background: linear-gradient(160deg, rgba(0, 229, 255, 0.08), var(--surface)); }
+.stat-box.lit-emerald { border-color: rgba(16, 185, 129, 0.5); background: linear-gradient(160deg, rgba(16, 185, 129, 0.08), var(--surface)); }
+.stat-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.stat-num { font-size: 28px; font-weight: 900; line-height: 1.05; margin: 5px 0; }
+.stat-num small { font-size: 12px; font-weight: 600; color: var(--muted); }
+
+/* 4. COMPACT 7-DAY STRIP */
+.week-bar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px;
+  margin-bottom: 14px;
+}
+.w-day {
+  text-align: center;
+  padding: 5px 2px;
+  border-radius: 9px;
+  font-size: 10.5px;
+  background: rgba(4, 7, 15, 0.5);
+  border: 1px solid transparent;
+}
+.w-day.today { border-color: var(--cyan); }
+.w-day.done { background: rgba(0, 229, 255, 0.12); border-color: rgba(0, 229, 255, 0.35); }
+
+/* NAVIGATION TABS */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+  background: var(--surface);
+  padding: 5px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+.tab {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 6px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 12.5px;
+}
+.tab.active {
+  background: var(--surface-2);
+  color: var(--cyan);
+  border: 1px solid rgba(0, 229, 255, 0.38);
+}
+@media (max-width: 680px) {
+  .tabs {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    margin: 0; border-radius: 18px 18px 0 0;
+    background: rgba(8, 14, 26, 0.96);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  }
+}
+
+.view { display: none; animation: fadeIn 0.18s ease; }
+.view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+/* CARDS & TIMER */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 11px;
+}
+.timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(16, 28, 51, 0.85));
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.clock-num { font-size: 26px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--cyan); }
+
+.guide-note {
+  background: #050912;
+  border-left: 3px solid var(--cyan);
+  padding: 9px 11px;
+  border-radius: 0 9px 9px 0;
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 8px 0;
+}
+
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 99px;
+  font-size: 11px; font-weight: 700;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+}
+.tag.cyan { color: var(--cyan); border-color: rgba(0, 229, 255, 0.35); background: rgba(0, 229, 255, 0.1); }
+.tag.emerald { color: #6ee7b7; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.12); }
+.tag.amber { color: #fcd34d; border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.12); }
+.tag.violet { color: #d8b4fe; border-color: rgba(168, 85, 247, 0.35); background: rgba(168, 85, 247, 0.14); }
+
+.bar { height: 6px; background: #15233b; border-radius: 99px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--cyan); border-radius: 99px; }
+
+.quiz-opt { width: 100%; justify-content: flex-start; text-align: left; padding: 10px 12px; margin-top: 6px; background: #060b16; }
+.quiz-opt.ok { border-color: var(--emerald); background: rgba(16, 185, 129, 0.2); color: #a7f3d0; }
+.quiz-opt.bad { border-color: var(--rose); background: rgba(244, 63, 94, 0.2); color: #fecdd3; }
+
+input, select {
+  background: #050a14; border: 1px solid var(--border);
+  border-radius: 9px; padding: 8px 10px; width: 100%;
+}
+label { font-size: 11px; color: var(--muted); font-weight: 700; display: block; margin-bottom: 4px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.small { font-size: 11.5px; color: var(--muted); }
+.hidden { display: none !important; }
+
+/* MODAL & TOAST */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(2, 5, 12, 0.85);
+  backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center;
+  padding: 16px; z-index: 80;
+}
+.modal-bg.open { display: flex; }
+.modal-box {
+  width: min(440px, 100%); background: var(--surface);
+  border: 1px solid rgba(0, 229, 255, 0.45); border-radius: 18px; padding: 18px;
+}
+.toast {
+  position: fixed; bottom: 74px; left: 50%; transform: translateX(-50%);
+  background: #052e22; color: #6ee7b7; border: 1px solid var(--emerald);
+  padding: 9px 16px; border-radius: 99px; font-weight: 800; font-size: 12px;
+  z-index: 95; display: none; white-space: nowrap; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+.toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- 1. HUD BAR COMPACTO (NUNCA SE DEFORMA EN MÓVIL) -->
+  <header class="hud-bar">
+    <div class="hud-left">
+      <div class="lvl-Orb" id="hudLevel">1</div>
+      <div class="rank-info">
+        <div class="rank-name" id="hudRank">Sin Verdad de Shinovar</div>
+        <div class="mini-xp"><i id="hudXpBar" style="width:0%"></i></div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <span class="hud-pill" title="XP Total"><span style="color:var(--cyan)">✦</span> <span id="hudXP">0</span></span>
+      <span class="hud-pill" title="Escudos Protectores">🛡️ <span id="hudShields">0</span>/3</span>
+      <button id="btnSync" class="btn-sm btn-ghost" style="border-radius:99px;padding:4px 9px" title="Estado de sincronización">
+        <span id="syncDot">⚡</span> <span id="syncText">Local</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. ALTAR EVOLUTIVO DE SANGRE NOCTURNA (ESTILO DUOLINGO) -->
+  <section class="altar stage-1" id="bladeAltar">
+    <div class="relic-frame" id="relicBox" title="Toca para previsualizar las 5 evoluciones de la espada">
+      <canvas id="bladeCanvas" width="160" height="160"></canvas>
+    </div>
+    <div class="altar-body">
+      <div class="altar-eyebrow">
+        <span id="stageBadge" style="color:var(--amber)">ESTADO · HAMBRIENTA</span>
+        <button id="btnCycleStage" class="btn-sm btn-ghost" style="padding:2px 7px;font-size:10.5px">👁️ Probar fases</button>
+      </div>
+      <h1 class="altar-title" id="bladeHeadline">Sangre Nocturna aguarda</h1>
+      <div class="speech-bubble" id="bladeWhisper">«¿Quieres destruir la inercia hoy? Solo pido 15 minutos.»</div>
+    </div>
+  </section>
+
+  <!-- 3. PILARES GEMELOS LADO A LADO EN ANDROID -->
+  <section class="twin-grid">
+    <!-- Columna Izquierda: Racha Global -->
+    <div class="stat-box" id="boxHonor">
+      <div class="row">
+        <span class="stat-label">🔥 Racha Honor</span>
+        <button id="btnRestDay" class="btn-sm btn-ghost" style="padding:2px 6px;font-size:10px" title="Declarar 1 descanso por semana">🌙 Descanso</button>
+      </div>
+      <div class="stat-num"><span id="streakNum">0</span> <small>días</small></div>
+      <div class="row small">
+        <span id="streakStateText">Falta hoy</span>
+        <span>Récord: <strong id="bestStreakNum">0</strong>d</span>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Sub-racha Cero Gaseosa/Azúcar (Potenciador XP) -->
+    <div class="stat-box" id="boxPure">
+      <div class="row">
+        <span class="stat-label" style="color:#6ee7b7">🧪 0 Azúcar/Gas</span>
+        <span class="tag emerald" id="multTag" style="padding:1px 6px;font-size:10.5px">×1.0 XP</span>
+      </div>
+      <div class="stat-num" style="color:#6ee7b7"><span id="pureNum">0</span> <small>días</small></div>
+      <div style="display:flex;gap:5px;margin-top:2px">
+        <button id="btnPureYes" class="btn-sm btn-emerald" style="flex:1;padding:5px">✓ Limpio hoy</button>
+        <button id="btnPureNo" class="btn-sm btn-rose" style="padding:5px 8px" title="Tomé gaseosa/azúcar (Drena el multiplicador a ×1.0)">✗</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. PULSO SEMANAL COMPACTO -->
+  <div class="week-bar" id="weekBar"></div>
+
+  <!-- NAVEGACIÓN DE 3 PESTAÑAS -->
+  <nav class="tabs">
+    <button class="tab active" data-view="v-today">⚔️ Hoy (Foco)</button>
+    <button class="tab" data-view="v-dojo">🧠 Dojo PL-300</button>
+    <button class="tab" data-view="v-log">📐 Cuerpo & Ruta</button>
+  </nav>
+
+  <!-- ==================== VISTA 1: HOY ==================== -->
+  <section id="v-today" class="view active">
+    <div class="timer-row">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="clock-num" id="clockDigits">20:00</div>
+        <div>
+          <div style="font-weight:800;font-size:12.5px" id="clockTitle">Ignición Rápida</div>
+          <div class="small">20 min bastan para cambiar el estado de la espada</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="btn-sm" data-setmin="15">15m</button>
+        <button class="btn-sm" data-setmin="25">25m</button>
+        <button id="btnClockToggle" class="btn-sm btn-cyan">▶ Iniciar</button>
+        <button id="btnClockDone" class="btn-sm btn-emerald hidden">✓</button>
+      </div>
+    </div>
+
+    <div id="triadContainer"></div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <div style="font-weight:800;font-size:12.5px">⚡ Registro de 1 Toque (Lectura o Entreno libre)</div>
+          <div class="small">Enciende la llama de hoy al instante</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="btn-sm" data-quick="reading|20">📚 +20m Libro</button>
+          <button class="btn-sm" data-quick="exercise|30">🏃 +30m Físico</button>
+          <button class="btn-sm" data-quick="study|30">🧠 +30m Data</button>
+          <button class="btn-sm" data-quick="cad|20">🛠️ +20m 3D</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== VISTA 2: DOJO PL-300 ==================== -->
+  <section id="v-dojo" class="view">
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="stat-label" style="color:var(--cyan)">META ENERO 2027 · DESBLOQUEO DE FEBRERO</div>
+          <h3 style="margin:2px 0 0;font-size:16px">🖨️ Condición de Sangre Nocturna (Bambu Lab)</h3>
+        </div>
+        <span id="certBadge" class="tag amber">🔒 PL-300 Pendiente</span>
+      </div>
+      <p class="small" style="margin:6px 0 10px">
+        Partes de <strong>60 % (09/10)</strong>. Ya tienes Preparación (78 %) y Visualización (76 %). Sube <strong>Modelado DAX (30 %)</strong> y <strong>Admin/RLS (55 %)</strong> para pasar el 80 %.
+      </p>
+      <div id="domainGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"></div>
+      <div class="row" style="padding-top:8px;border-top:1px solid var(--border)">
+        <div style="display:flex;gap:6px">
+          <input id="inMock" type="number" min="0" max="100" placeholder="Nuevo simulacro %" style="width:140px">
+          <button id="btnSaveMock" class="btn-sm btn-cyan">Guardar %</button>
+        </div>
+        <button id="btnApproveCert" class="btn-sm btn-emerald">🏅 Aprobé PL-300 Oficial</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="margin-bottom:8px">
+        <div>
+          <div class="stat-label" style="color:var(--violet)">TUS ERRORES DEL SIMULACRO</div>
+          <h3 style="margin:2px 0 0;font-size:15px">Dojo Quirúrgico PL-300 <span class="tag violet" id="dojoCount">0/12</span></h3>
+        </div>
+        <button id="btnNextQ" class="btn-sm">Siguiente →</button>
+      </div>
+      <div id="quizBox"></div>
+    </div>
+  </section>
+
+  <!-- ==================== VISTA 3: CUERPO, RUTA & CLOUD ==================== -->
+  <section id="v-log" class="view">
+    <div class="card">
+      <div class="row" style="margin-bottom:6px">
+        <div>
+          <div class="stat-label">BIOMETRÍA · MEDIA MÓVIL 7 DÍAS</div>
+          <h3 style="margin:2px 0 0;font-size:16px" id="bioTitle">Promedio 7d: 80.0 kg → Meta: 75.0 kg</h3>
+        </div>
+        <span class="tag cyan" id="waistPill">Cintura: -- cm</span>
+      </div>
+      <div id="bioChart"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-top:8px">
+        <input id="inWeight" type="number" step="0.1" placeholder="Peso kg">
+        <input id="inFat" type="number" step="0.1" placeholder="% Grasa">
+        <input id="inWaist" type="number" step="0.5" placeholder="Cintura cm">
+        <button id="btnAddBio" class="btn-sm btn-cyan">Guardar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="margin-bottom:8px">
+        <h3 style="margin:0;font-size:15px">Mapa Completo de Misiones</h3>
+        <select id="fltFront" style="width:auto;padding:5px 8px;font-size:12px">
+          <option value="all">Todos los frentes</option>
+          <option value="tech">🧠 Data & PL-300</option>
+          <option value="physical">🏃 Físico</option>
+          <option value="maker">🛠️ 3D (De 1% a 100%)</option>
+        </select>
+      </div>
+      <div id="fullQuestList" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="margin-bottom:8px">
+        <div>
+          <div class="stat-label">CONEXIÓN GOOGLE SHEETS (OPCIÓN B) & PRESUPUESTO</div>
+          <strong id="budgetText">Presupuesto: S/ 0 / S/ 10.000</strong>
+        </div>
+        <button id="btnExpenseModal" class="btn-sm">+ Gasto</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input id="inGasUrl" type="url" placeholder="Pega aquí la URL /exec de tu Google Apps Script">
+        <button id="btnSaveUrl" class="btn-sm btn-cyan">Conectar</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button id="btnExport" class="btn-sm">↓ Exportar JSON</button>
+        <button id="btnImport" class="btn-sm">↑ Importar JSON</button>
+        <input id="fileImport" type="file" accept=".json" class="hidden">
+        <button id="btnReset" class="btn-sm btn-rose" style="margin-left:auto">Reiniciar</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-box">
+    <div class="row" style="margin-bottom:10px">
+      <strong id="modalTitle"></strong>
+      <button id="btnCloseModal" class="btn-sm btn-ghost">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
+
+const STORAGE_KEY = 'camino_destino_personal_v2';
+const CLOUD_URL_KEY = 'szeth_gas_url';
+
+const FRONTS = {
+  tech:     { name: 'Data & PL-300', icon: '🧠', color: '#00e5ff', budget: 3500 },
+  physical: { name: 'Templo Físico', icon: '🏃', color: '#10b981', budget: 2000 },
+  maker:    { name: 'Forja 3D (1%→100%)', icon: '🛠️', color: '#f59e0b', budget: 3000 }
+};
+
+const mkQ = (id, front, title, desc, guide, xp, minutes, req, doneAt = null) => ({
+  id, front, title, desc, guide, xp, minutes,
+  type: xp >= 100 ? 'milestone' : 'normal',
+  completedAt: doneAt,
+  locked: !!req,
+  requiredQuestId: req || undefined
+});
+
+const DEFAULT_QUESTS = [
+  mkQ('t1', 'tech', 'Diagnóstico Base PL-300 (60 % registrado)', '50 preguntas evaluadas el 09/10/2026.', 'Ya completado. Brecha principal: Modelado DAX (30 %) y Admin/RLS (55 %).', 50, 45, '', '2026-10-09T12:00:00.000Z'),
+  mkQ('t2', 'tech', 'Dominar Contexto de Filtro: CALCULATE + ALL + VAR', 'Construye 3 medidas en Power BI Desktop: una con CALCULATE y ALL, un TOPN(5,...) y otra con VAR.', '💡 Clave de examen: CALCULATE es la única función que altera el contexto de filtro (no existe IGNORE). Usar VAR evalúa la expresión una sola vez.', 40, 30, 't1'),
+  mkQ('t3', 'tech', 'Esquema Estrella 1:N y Columnas vs Medidas', 'Valida relaciones 1:N simples y diferencia dónde viven las Columnas Calculadas frente a las Medidas.', '💡 Clave de examen: Segmentaciones (Slicers) y Filtros de página exigen Columnas Calculadas; las Medidas van en visuales.', 35, 25, 't2'),
+  mkQ('t4', 'tech', 'Power Query Óptimo: Referencia sin duplicar RAM', 'Activa perfilado sobre el 100 % de filas y crea una tabla por Referencia deshabilitando la carga del origen.', '💡 Esquina inferior izquierda en PQ -> "Generación de perfiles basada en todo el conjunto de datos".', 35, 25, 't3'),
+  mkQ('t5', 'tech', 'RLS Dinámico (USERPRINCIPALNAME) y RangeStart/RangeEnd', 'Configura un rol en Desktop y crea los parámetros de actualización incremental.', '💡 RLS nace en Desktop ("Administrar roles") con USERPRINCIPALNAME(). La actualización incremental exige RangeStart y RangeEnd.', 50, 35, 't4'),
+  mkQ('t6', 'tech', 'Segundo Simulacro PL-300: Superar el 75 %', 'Rinde el segundo simulacro tras dominar el Dojo y registra tu nuevo puntaje.', 'Apunta a subir Modelado sobre 70 %.', 120, 50, 't5'),
+  mkQ('t7', 'tech', '👑 TERCER IDEAL: Aprobar el Examen Oficial PL-300 (Enero)', 'Aprueba el examen oficial en enero para desbloquear a Sangre Nocturna en febrero.', 'Desbloqueo definitivo de la impresora 3D.', 400, 90, 't6'),
+
+  mkQ('f1', 'physical', 'Punto Cero en Ayunas: Peso y Cintura reales', 'Pésate al despertar en ayunas y registra peso y cintura en la pestaña Cuerpo.', '💡 Sin juicio: a partir de hoy manda tu promedio móvil de 7 días y tu racha 0 Gaseosa.', 25, 10, ''),
+  mkQ('f2', 'physical', 'Ignición de 20 min + Definir sede de Gimnasio', 'Haz hoy 20 min de caminata rápida o movilidad y define a qué gimnasio irás esta semana.', '💡 Veinte minutos hoy activan el aura de Sangre Nocturna.', 30, 20, 'f1'),
+  mkQ('f3', 'physical', 'Día 1 en el Gimnasio: Sesión de calibración (Sin agujetas)', 'Cumple tu primera sesión de 40 min al 65 % de esfuerzo para poder volver en 48 horas.', '💡 El secreto para no abandonar la primera semana es no entrenar al fallo el primer día.', 45, 45, 'f2'),
+  mkQ('f4', 'physical', 'Tríada Física: 3 sesiones en una misma semana', 'Completa 3 días de ejercicio dentro de la misma semana.', '3 sesiones + 0 gaseosa aseguran bajar ~0,4 kg por semana.', 80, 60, 'f3'),
+  mkQ('f5', 'physical', '👑 META 3 MESES: Consolidar 75.0 kg', 'Llega a 75.0 kg en tu promedio móvil de 7 días.', 'Recompensa de salud y energía sostenida.', 300, 45, 'f4'),
+
+  mkQ('m1', 'maker', 'Nivel 1% → 20%: Física de Impresión 3D en 15 min', 'Entiende los 4 pilares de una impresora FDM antes de instalar nada.', '📐 RESUMEN RÁPIDO (Léelo y marca completada):\n1. FDM funde filamento PLA (~210°C) por una boquilla de 0.4 mm en capas de 0.20 mm.\n2. Las piezas tienen 2–3 paredes y relleno interno al 15% (Gyroid): ligeras e irrompibles.\n3. Regla de 45°: no se puede imprimir en el aire; ángulos mayores usan soportes.\n4. Bambu Lab A1 / A1 Mini: se calibran 100% solas con sensores y cambian entre 4 colores (AMS Lite).', 30, 15, ''),
+  mkQ('m2', 'maker', 'Nivel 20% → 45%: Instalar Bambu Studio y Laminar 1 pieza', 'Descarga Bambu Studio en PC, carga un cubo de prueba, dale a "Slice" y mira las capas por dentro.', '💡 El Slicer te dirá exactamente cuántos gramos de plástico y cuántos minutos toma cada pieza.', 35, 25, 'm1'),
+  mkQ('m3', 'maker', 'Nivel 45% → 70%: Primer Diseño Paramétrico (Onshape / Fusion)', 'Crea una variable #lado = 35mm, dibuja un boceto con medidas restringidas y extrúyelo 5 mm.', '💡 Como ingeniero de sistemas, diseñar con variables es programar objetos físicos.', 45, 35, 'm2'),
+  mkQ('m4', 'maker', 'Nivel 70% → 90%: Tolerancias Reales (Holgura de 0.20 mm)', 'Diseña una caja con tapa dejando una variable #holgura = 0.20 mm para que encaje en la vida real.', '💡 Sin 0.20 mm de margen, las piezas impresas no entran entre sí.', 60, 40, 'm3'),
+  mkQ('m5', 'maker', 'Nivel 90% → 100%: Elegir con tus Hijas el 1er Proyecto en MakerWorld', 'Ya dominando la técnica, muéstrales en Bambu Studio cómo se pinta e imprime un diseño en 4 colores.', '💡 Ellas eligen el modelo; tú ya sabes exactamente cómo fabricarlo.', 70, 30, 'm4')
+];
+
+const QUIZ_BANK = [
+  { id: 'q1', dom: 'Modelado DAX', q: '¿Qué función DAX es la única que modifica o ignora el contexto de filtro existente?', opts: ['IGNORE()', 'CALCULATE()', 'FILTER()', 'REMOVEFILTERS() sola'], a: 1, exp: 'CALCULATE() evalúa una expresión modificando el contexto de filtro (P22 del simulacro).' },
+  { id: 'q2', dom: 'Modelado DAX', q: 'Necesitas devolver los 10 mejores productos por ventas. ¿Qué función usas?', opts: ['RANKX()', 'TOPN()', 'MAXN()', 'GENERATE()'], a: 1, exp: 'TOPN(10, Tabla, [Ventas]) devuelve las N filas superiores (P34 del simulacro).' },
+  { id: 'q3', dom: 'Modelado DAX', q: '¿Cuáles son las 2 ventajas reales de usar variables (VAR ... RETURN) en DAX?', opts: ['Cambiar el origen y agregar funciones', 'Mejorar rendimiento (evalúa 1 vez) y legibilidad', 'Convertir medidas en columnas', 'Usar medidas en Slicers'], a: 1, exp: 'VAR guarda en caché el resultado intermedio y mejora la legibilidad (P28).' },
+  { id: 'q4', dom: 'Modelado', q: '¿Dónde puedes usar una Columna Calculada pero NUNCA una Medida DAX?', opts: ['Valores de matriz', 'Segmentaciones (Slicers) y Filtros de página', 'Formato condicional', 'Tarjetas KPI'], a: 1, exp: 'Slicers y filtros de página requieren valores fijos por fila (P20).' },
+  { id: 'q5', dom: 'Modelado', q: '¿Cómo limpias la caché del motor VertiPaq sin reiniciar Power BI Desktop?', opts: ['Opciones -> Borrar caché PQ', 'Conectar DAX Studio y ejecutar Clear Cache', 'Cambiar a modo Dual', 'Quitar relaciones'], a: 1, exp: 'DAX Studio limpia la caché del motor analítico en vivo (P25).' },
+  { id: 'q6', dom: 'Modelado', q: 'Para que Regiones filtre la tabla Sales de forma óptima:', opts: ['Filtro bidireccional', 'Relación Uno a Muchos (1:*) de Regiones a Sales', 'Combinar en Power Query', 'LOOKUPVALUE'], a: 1, exp: 'Relación 1:* desde Dimensión hacia Hechos con filtro simple (P15).' },
+  { id: 'q7', dom: 'Preparación PQ', q: '¿Cómo activas el perfilado de calidad de columnas sobre más de 1.000 filas?', opts: ['En Vista de Datos', 'En Power Query clic abajo en "Generación de perfiles basada en todo el conjunto de datos"', 'En Vista Modelo', 'Con parámetro N'], a: 1, exp: 'En la esquina inferior izquierda del Editor de Power Query (P8 y P9).' },
+  { id: 'q8', dom: 'Preparación PQ', q: 'Crear tabla resumida en Power Query sin duplicar peso en el modelo final:', opts: ['Duplicar consulta', 'Referenciar consulta y deshabilitar carga (Enable Load) de la original', 'Mover columnas', 'Tabla DAX'], a: 1, exp: 'Referenciar + desmarcar Habilitar carga en la tabla pesada (P14).' },
+  { id: 'q9', dom: 'Admin y RLS', q: '¿Dónde nace el RLS y qué función filtra dinámicamente por usuario?', opts: ['En el Servicio con roles fijos', 'En Desktop ("Administrar roles") usando USERPRINCIPALNAME()', 'En Power Query', 'En Azure AD'], a: 1, exp: 'Los roles se crean en Desktop y USERPRINCIPALNAME() lee el login (P38 y P46).' },
+  { id: 'q10', dom: 'Admin', q: 'Primer paso obligatorio para Actualización Incremental:', opts: ['Crear parámetros Date/Time RangeStart y RangeEnd en Power Query', 'Activar DirectQuery', 'Certificar modelo', 'Gateway VNet'], a: 0, exp: 'Exige los parámetros exactos RangeStart y RangeEnd (P43).' },
+  { id: 'q11', dom: 'Admin', q: 'Conectar Power BI Service a SQL Server local y avalar un modelo oficial:', opts: ['VNet Gateway + Promover', 'Puerta de enlace local (On-premises) + Certificar modelo', 'DirectQuery + Favorito', 'OneDrive'], a: 1, exp: 'Servidor local usa On-premises gateway; el aval oficial es Certificar (P45 y P47).' },
+  { id: 'q12', dom: 'Visualización', q: '¿Qué visual exige la función nativa de "Detección de anomalías"?', opts: ['Q&A', 'Gráfico de líneas (con serie temporal)', 'Dispersión', 'Cascada'], a: 1, exp: 'Solo funciona en gráficos de líneas con eje de tiempo (P41).' }
+];
+
+const $ = id => document.getElementById(id);
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const startOfWeekISO = iso => {
+  const d = iso ? new Date(iso + 'T00:00:00') : new Date();
+  const day = (d.getDay() + 6) % 7;
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - day);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+function defaultGoal() {
+  return {
+    startDate: '2026-10-14', startWeight: 80, startFat: 25, targetWeight: 75, targetDate: '2027-01-31', targetFat: 20, fatDate: '2027-10-14',
+    domains: { prep: 78, model: 30, viz: 76, admin: 55 },
+    dojoMastered: [], cleanDietDates: [], sugarDrainDates: []
+  };
+}
+
+function initialState() {
+  return {
+    version: 3, createdAt: new Date().toISOString(), xp: 0,
+    quests: JSON.parse(JSON.stringify(DEFAULT_QUESTS)),
+    seeded: DEFAULT_QUESTS.map(q => q.id),
+    body: [], goal: defaultGoal(), restDates: [],
+    mocks: [{ id: 'mock_oct9', date: '2026-10-09', pct: 60, createdAt: '2026-10-09T12:00:00.000Z' }],
+    oath: 'Enero PL-300 · Febrero Sangre Nocturna',
+    certifications: { pl300: false }, expenses: [],
+    sessions: [{ id: 'ses_oct9', title: 'Diagnóstico PL-300', front: 'tech', date: '2026-10-09', minutes: 45, kind: 'study', notes: '60%', createdAt: '2026-10-09T12:00:00.000Z', xpAwarded: 0 }],
+    streakShields: 0, shieldUsedDates: [], claimedAchievements: [], weekGoal: 5, lastExport: null
+  };
+}
+
+function normalizeState(s) {
+  if (!s || typeof s !== 'object') return initialState();
+  s.version = 3;
+  s.certifications = s.certifications || { pl300: false };
+  ['expenses', 'sessions', 'body', 'restDates', 'shieldUsedDates', 'claimedAchievements'].forEach(k => { if (!Array.isArray(s[k])) s[k] = []; });
+  if (!Array.isArray(s.mocks) || !s.mocks.length) s.mocks = [{ id: 'mock_oct9', date: '2026-10-09', pct: 60, createdAt: '2026-10-09T12:00:00.000Z' }];
+  const dg = defaultGoal();
+  s.goal = Object.assign({}, dg, s.goal || {});
+  s.goal.domains = Object.assign({}, dg.domains, (s.goal && s.goal.domains) || {});
+  ['dojoMastered', 'cleanDietDates', 'sugarDrainDates'].forEach(k => { if (!Array.isArray(s.goal[k])) s.goal[k] = []; });
+  if (!Array.isArray(s.quests) || !s.quests.some(q => q.guide)) {
+    const done = new Set((s.quests || []).filter(q => q.completedAt).map(q => q.id));
+    s.quests = JSON.parse(JSON.stringify(DEFAULT_QUESTS)).map(q => {
+      if (done.has(q.id) && !q.completedAt) q.completedAt = new Date().toISOString();
+      return q;
+    });
+  }
+  recalcAll(s);
+  return s;
+}
+
+function activeDates(s = state) {
+  const set = new Set();
+  (s.quests || []).filter(q => q.completedAt).forEach(q => set.add(q.completedAt.slice(0, 10)));
+  (s.sessions || []).forEach(x => { if (x.date) set.add(x.date); });
+  return [...set].sort();
+}
+
+function computeHonorStreak(s = state) {
+  const act = new Set(activeDates(s));
+  const cov = new Set([...(s.shieldUsedDates || []), ...(s.restDates || [])]);
+  if (!act.size) return 0;
+  const t = todayISO();
+  let cur = new Date(t + 'T00:00:00');
+  if (!act.has(t) && !cov.has(t)) cur.setDate(cur.getDate() - 1);
+  let n = 0;
+  while (true) {
+    const ds = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+    if (act.has(ds) || cov.has(ds)) { n++; cur.setDate(cur.getDate() - 1); } else break;
+  }
+  return n;
+}
+
+function computeBestStreak(s = state) {
+  const all = [...new Set([...activeDates(s), ...(s.shieldUsedDates || []), ...(s.restDates || [])])].sort();
+  let best = 0, run = 0, prev = null;
+  all.forEach(d => {
+    run = (prev && Math.round((new Date(d + 'T00:00:00') - new Date(prev + 'T00:00:00')) / 86400000) === 1) ? run + 1 : 1;
+    if (run > best) best = run;
+    prev = d;
+  });
+  return best;
+}
+
+function getPureInfo(s = state) {
+  const clean = new Set((s.goal && s.goal.cleanDietDates) || []);
+  const drain = new Set((s.goal && s.goal.sugarDrainDates) || []);
+  const t = todayISO();
+  if (drain.has(t)) return { streak: 0, mult: 1.0, cleanToday: false };
+  let cur = new Date(t + 'T00:00:00');
+  if (!clean.has(t)) cur.setDate(cur.getDate() - 1);
+  let n = 0;
+  while (true) {
+    const ds = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+    if (clean.has(ds) && !drain.has(ds)) { n++; cur.setDate(cur.getDate() - 1); } else break;
+  }
+  const mult = n >= 7 ? 1.5 : (n >= 3 ? 1.3 : (n >= 1 ? 1.15 : 1.0));
+  return { streak: n, mult, cleanToday: clean.has(t) };
+}
+
+function recalcAll(s) {
+  (s.quests || []).forEach(q => {
+    if (q.requiredQuestId) {
+      const p = s.quests.find(x => x.id === q.requiredQuestId);
+      q.locked = p ? !p.completedAt : false;
+    } else q.locked = false;
+  });
+  const used = {};
+  [...(s.sessions || [])].filter(x => x.kind === 'reading').sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || '')).forEach(x => {
+    const u = used[x.date] || 0;
+    const g = Math.max(0, Math.min(Math.floor((Number(x.minutes) || 0) / 20) * 5, 20 - u));
+    x.xpAwarded = g; used[x.date] = u + g;
+  });
+  const pureTotal = (s.goal.cleanDietDates || []).length;
+  for (let i = 1; i <= Math.floor(pureTotal / 7); i++) {
+    if (!s.claimedAchievements.includes(`p7_${i}`)) s.claimedAchievements.push(`p7_${i}`);
+  }
+  s.streakShields = Math.min(3, Math.max(0, s.claimedAchievements.length - (s.shieldUsedDates || []).length));
+  const qXP = (s.quests || []).filter(q => q.completedAt).reduce((n, q) => n + (Number(q.xp) || 0), 0);
+  const rXP = (s.sessions || []).reduce((n, x) => n + (Number(x.xpAwarded) || 0), 0);
+  const pXP = pureTotal * 15;
+  const dXP = (s.goal.dojoMastered || []).length * 10;
+  s.xp = qXP + rXP + pXP + dXP;
+}
+
+/* ============================================================================
+   MOTOR GRÁFICO DINÁMICO DE SANGRE NOCTURNA (ESTILO DUOLINGO + FAVICON + BADGE)
+   ============================================================================ */
+let previewStageOverride = null;
+
+const STAGES = [
+  {
+    id: 0,
+    badge: 'FASE 0 · ENVAINADA (RACHA 0)',
+    badgeColor: '#94a3b8',
+    title: 'Sangre Nocturna duerme',
+    whisper: '«La hoja está fría en Shinovar. Completa 1 acción hoy para desenvainar.»',
+    aura1: '#334155', aura2: '#04070f',
+    bladeStroke: '#475569', smokeColor: 'rgba(15,23,42,0.7)', sparks: 0, lightning: false
+  },
+  {
+    id: 1,
+    badge: 'FASE 1 · HAMBRIENTA (FALTA HOY)',
+    badgeColor: '#fb7185',
+    title: '¡La espada exige acción hoy!',
+    whisper: '«Aún no has entrenado ni estudiado hoy... ¿Destruimos la inercia en 15 minutos?»',
+    aura1: '#f43f5e', aura2: '#070a14',
+    bladeStroke: '#fbbf24', smokeColor: 'rgba(225,29,72,0.45)', sparks: 4, lightning: false
+  },
+  {
+    id: 2,
+    badge: 'FASE 2 · DESPIERTA (LLAMA ACTIVA)',
+    badgeColor: '#00e5ff',
+    title: 'Sangre Nocturna despierta',
+    whisper: '«Hoy cumpliste tu juramento. El humo negro y la luz cian responden a tu mando.»',
+    aura1: '#00e5ff', aura2: '#040917',
+    bladeStroke: '#00e5ff', smokeColor: 'rgba(0,0,0,0.85)', sparks: 7, lightning: false
+  },
+  {
+    id: 3,
+    badge: 'FASE 3 · IMBUIDA (+3 DÍAS / PUREZA)',
+    badgeColor: '#34d399',
+    title: 'Flujo Gravimétrico Activo',
+    whisper: '«Cero azúcar y racha firme. Tu mente corta el temario de PL-300 sin resistencia.»',
+    aura1: '#10b981', aura2: '#03121c',
+    bladeStroke: '#6ee7b7', smokeColor: 'rgba(0,229,255,0.4)', sparks: 12, lightning: true
+  },
+  {
+    id: 4,
+    badge: 'FASE 4 · TORMENTA ALTA (7+ DÍAS)',
+    badgeColor: '#d8b4fe',
+    title: 'Quinto Ideal · Yo Soy la Ley',
+    whisper: '«Imparable. A este ritmo, en enero cae el PL-300 y en febrero despierta la impresora.»',
+    aura1: '#a855f7', aura2: '#090418',
+    bladeStroke: '#f0abfc', smokeColor: 'rgba(0,229,255,0.55)', sparks: 18, lightning: true
+  }
+];
+
+function computeCurrentStage(s = state) {
+  if (previewStageOverride !== null) return STAGES[previewStageOverride];
+  const streak = computeHonorStreak(s);
+  const doneToday = activeDates(s).includes(todayISO());
+  const pure = getPureInfo(s);
+  if (!doneToday) return streak === 0 ? STAGES[0] : STAGES[1];
+  if (streak >= 7 || (streak >= 4 && pure.streak >= 4)) return STAGES[4];
+  if (streak >= 3 || pure.cleanToday) return STAGES[3];
+  return STAGES[2];
+}
+
+function drawNightbloodCanvas(stage, streakNumber) {
+  const cv = $('bladeCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Fondo radial según estado
+  const grad = ctx.createRadialGradient(W * 0.5, H * 0.48, 8, W * 0.5, H * 0.5, W * 0.52);
+  grad.addColorStop(0, stage.aura1);
+  grad.addColorStop(0.65, stage.aura2);
+  grad.addColorStop(1, '#04070f');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Humo abisal alrededor de la hoja
+  ctx.save();
+  ctx.fillStyle = stage.smokeColor;
+  ctx.beginPath();
+  ctx.moveTo(64, 118);
+  ctx.bezierCurveTo(42, 98, 52, 74, 68, 60);
+  ctx.bezierCurveTo(55, 45, 74, 34, 80, 46);
+  ctx.bezierCurveTo(96, 36, 112, 58, 96, 78);
+  ctx.bezierCurveTo(114, 94, 102, 116, 86, 126);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Rayos de Luz Tormentosa en Fases 3 y 4
+  if (stage.lightning) {
+    ctx.save();
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(52, 35); ctx.lineTo(66, 62); ctx.lineTo(54, 82); ctx.lineTo(72, 118);
+    ctx.moveTo(108, 40); ctx.lineTo(94, 68); ctx.lineTo(106, 90); ctx.lineTo(88, 124);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Partículas / chispas
+  for (let i = 0; i < stage.sparks; i++) {
+    const ang = (i / stage.sparks) * Math.PI * 2;
+    const rad = 28 + (i % 3) * 14;
+    const px = W / 2 + Math.cos(ang) * rad;
+    const py = H / 2 + Math.sin(ang) * rad;
+    ctx.fillStyle = i % 2 === 0 ? '#ffffff' : stage.bladeStroke;
+    ctx.beginPath();
+    ctx.arc(px, py, (i % 2) + 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Pomo y empuñadura
+  ctx.fillStyle = '#e2e8f0';
+  ctx.beginPath();
+  ctx.moveTo(73, 18); ctx.lineTo(87, 18); ctx.lineTo(89, 27); ctx.lineTo(71, 27);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#090d16';
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 1.5;
+  ctx.fillRect(74, 27, 12, 22);
+  ctx.strokeRect(74, 27, 12, 22);
+
+  // Guarda cruzada plateada
+  ctx.fillStyle = '#f1f5f9';
+  ctx.beginPath();
+  ctx.moveTo(42, 54); ctx.lineTo(63, 47); ctx.lineTo(80, 50); ctx.lineTo(97, 47); ctx.lineTo(118, 54);
+  ctx.lineTo(111, 60); ctx.lineTo(95, 54); ctx.lineTo(80, 65); ctx.lineTo(65, 54); ctx.lineTo(49, 60);
+  ctx.closePath();
+  ctx.fill();
+
+  // Hoja negra azabache con filo brillante
+  ctx.fillStyle = '#03050a';
+  ctx.strokeStyle = stage.bladeStroke;
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(73, 57); ctx.lineTo(87, 57); ctx.lineTo(87, 126); ctx.lineTo(80, 144); ctx.lineTo(73, 126);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Nervio central luminoso
+  ctx.strokeStyle = stage.bladeStroke;
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(80, 63); ctx.lineTo(80, 136);
+  ctx.stroke();
+
+  // Insignia de racha dentro del ícono
+  if (streakNumber > 0) {
+    ctx.fillStyle = 'rgba(4, 7, 15, 0.88)';
+    ctx.strokeStyle = stage.bladeStroke;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(104, 114, 46, 36, 10);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '900 18px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${streakNumber}d`, 127, 138);
+  }
+
+  // Actualizar el Favicon dinámico y el Badge de Android PWA
+  try {
+    const link = $('dynamicFavicon');
+    if (link) link.href = cv.toDataURL('image/png');
+    if ('setAppBadge' in navigator) {
+      if (streakNumber > 0) navigator.setAppBadge(streakNumber).catch(() => {});
+      else navigator.clearAppBadge().catch(() => {});
+    }
+  } catch (e) {}
+}
+
+/* ============================================================================
+   PERSISTENCIA Y SINCRONIZACIÓN CLOUD (OPCIÓN B)
+   ============================================================================ */
+let state = (() => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? normalizeState(JSON.parse(raw)) : initialState();
+  } catch (e) { return initialState(); }
+})();
+
+const IS_GAS = typeof google !== 'undefined' && !!(google.script && google.script.run);
+const OPS_KEY = STORAGE_KEY + '_ops';
+const BASE_KEY = STORAGE_KEY + '_base';
+let ops = (() => { try { return JSON.parse(localStorage.getItem(OPS_KEY)) || []; } catch (e) { return []; } })();
+let base = (() => { try { return JSON.parse(localStorage.getItem(BASE_KEY)) || {}; } catch (e) { return {}; } })();
+let syncing = false;
+
+const COLS = {
+  Quests: { get: s => s.quests, set: (s, a) => { s.quests = a; } },
+  Sessions: { get: s => s.sessions, set: (s, a) => { s.sessions = a; } },
+  Expenses: { get: s => s.expenses, set: (s, a) => { s.expenses = a; } },
+  Body: { get: s => s.body, set: (s, a) => { s.body = a; } },
+  Mocks: { get: s => s.mocks, set: (s, a) => { s.mocks = a; } },
+  RestDates: { get: s => s.restDates.map(d => ({ id: d, date: d })), set: (s, a) => { s.restDates = a.map(x => x.date); } },
+  ShieldUses: { get: s => s.shieldUsedDates.map(d => ({ id: d, date: d })), set: (s, a) => { s.shieldUsedDates = a.map(x => x.date); } },
+  Claims: { get: s => s.claimedAchievements.map(id => ({ id })), set: (s, a) => { s.claimedAchievements = a.map(x => x.id); } }
+};
+const CFG_KEYS = ['certifications', 'goal', 'oath', 'weekGoal', 'seeded', 'lastExport'];
+
+function hasCloud() { return IS_GAS || !!localStorage.getItem(CLOUD_URL_KEY); }
+
+function queueOps() {
+  if (!hasCloud()) return;
+  const now = new Date().toISOString();
+  const push = op => {
+    ops = ops.filter(o => !(o.col === op.col && o.id === op.id));
+    ops.push({ opId: `o_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`, ...op });
+  };
+  for (const [col, c] of Object.entries(COLS)) {
+    for (const r of c.get(state)) {
+      const k = col + '|' + r.id, j = JSON.stringify(r);
+      if (base[k] !== j) { base[k] = j; push({ col, id: r.id, rec: r, updatedAt: now }); }
+    }
+  }
+  for (const key of CFG_KEYS) {
+    const k = 'cfg|' + key, j = JSON.stringify(state[key]);
+    if (base[k] !== j) { base[k] = j; push({ col: 'Config', id: key, rec: state[key], updatedAt: now }); }
+  }
+  try {
+    localStorage.setItem(OPS_KEY, JSON.stringify(ops));
+    localStorage.setItem(BASE_KEY, JSON.stringify(base));
+  } catch (e) {}
+}
+
+async function syncNow() {
+  if (!hasCloud() || syncing) return;
+  syncing = true;
+  $('syncDot').textContent = '⏳';$('syncText').textContent = 'Sync';
+  try {
+    const callServer = (fn, payload) => {
+      if (IS_GAS) return new Promise((ok, no) => google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](payload));
+      return fetch(localStorage.getItem(CLOUD_URL_KEY), {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: fn, payload })
+      }).then(r => r.json());
+    };
+    if (ops.length) {
+      const batch = ops.slice(0, 180);
+      await callServer('applyOps', batch);
+      ops = ops.slice(batch.length);
+      localStorage.setItem(OPS_KEY, JSON.stringify(ops));
+    } else {
+      const remote = await callServer('getState');
+      if (remote && !remote.empty && remote.cols) {
+        for (const [col, c] of Object.entries(COLS)) {
+          if (remote.cols[col] && remote.cols[col].length) c.set(state, remote.cols[col]);
+        }
+        if (remote.cfg) CFG_KEYS.forEach(k => { if (k in remote.cfg) state[k] = remote.cfg[k]; });
+        state = normalizeState(state);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+    }
+    $('syncDot').textContent = '🟢';
+    $('syncText').textContent = 'Cloud';
+  } catch (e) {
+    $('syncDot').textContent = '🟠';
+    $('syncText').textContent = `Pend(${ops.length})`;
+  } finally {
+    syncing = false;
+    render();
+  }
+}
+
+function save() {
+  previewStageOverride = null;
+  recalcAll(state);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  queueOps();
+  render();
+  if (hasCloud() && ops.length) setTimeout(syncNow, 1000);
+}
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function rankTitle(lvl, pl300) {
+  if (lvl < 3) return 'Sin Verdad de Shinovar';
+  if (lvl < 6) return '1er Ideal · Escudero';
+  if (lvl < 10) return '2do Ideal · Rompecielos';
+  if (lvl < 16 || !pl300) return '3er Ideal · Juramento Enero';
+  return '4to Ideal · Sangre Nocturna';
+}
+
+let quizIdx = 0;
+
+function render() {
+  const xp = state.xp || 0;
+  const lvl = Math.floor(xp / 100) + 1;
+  const within = xp % 100;
+  const hStreak = computeHonorStreak(state);
+  const bStreak = Math.max(computeBestStreak(state), hStreak);
+  const t = todayISO();
+  const doneToday = activeDates(state).includes(t);
+  const pure = getPureInfo(state);
+  const stg = computeCurrentStage(state);
+
+  // 1. HUD superior
+  $('hudLevel').textContent = lvl;
+  $('hudRank').textContent = rankTitle(lvl, state.certifications?.pl300);
+  $('hudXpBar').style.width = `${within}%`;
+  $('hudXP').textContent = `${xp} XP`;
+  $('hudShields').textContent = state.streakShields || 0;
+
+  // 2. Altar Evolutivo de Sangre Nocturna
+  $('bladeAltar').className = `altar stage-${stg.id}`;
+  $('stageBadge').textContent = stg.badge;
+  $('stageBadge').style.color = stg.badgeColor;
+  $('bladeHeadline').textContent = stg.title;
+  $('bladeWhisper').textContent = stg.whisper;
+  drawNightbloodCanvas(stg, hStreak);
+
+  // 3. Pilares Gemelos
+  $('streakNum').textContent = hStreak;
+  $('bestStreakNum').textContent = bStreak;
+  $('streakStateText').innerHTML = doneToday ? '<strong style="color:var(--cyan)">✓ Activa hoy</strong>' : '<span style="color:var(--rose)">⚡ Falta hoy</span>';
+  $('boxHonor').className = 'stat-box ' + (doneToday ? 'lit-cyan' : '');
+
+  $('pureNum').textContent = pure.streak;
+  $('multTag').textContent = `×${pure.mult.toFixed(2).replace(/0$/, '')} XP`;
+  $('boxPure').className = 'stat-box ' + (pure.cleanToday ? 'lit-emerald' : '');
+  $('btnPureYes').textContent = pure.cleanToday ? '✓ Limpio hoy' : '✓ 0 Azúcar hoy';
+
+  // 4. Barra de 7 días
+  const wk = new Date(startOfWeekISO(t) + 'T00:00:00');
+  const dNames = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const actSet = new Set(activeDates(state));
+  const cleanSet = new Set(state.goal.cleanDietDates || []);
+  $('weekBar').innerHTML = dNames.map((n, i) => {
+    const d = new Date(wk); d.setDate(wk.getDate() + i);
+    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const hasH = actSet.has(ds), hasP = cleanSet.has(ds);
+    return `<div class="w-day ${ds === t ? 'today' : ''} ${hasH ? 'done' : ''}">
+      <div class="small" style="font-size:9.5px">${n}</div>
+      <div style="font-weight:800;font-size:12px">${d.getDate()}</div>
+      <div style="font-size:10px;height:13px">${hasH ? '🔥' : '·'}${hasP ? '🧪' : ''}</div>
+    </div>`;
+  }).join('');
+
+  // 5. Tríada de Hoy
+  $('triadContainer').innerHTML = Object.entries(FRONTS).map(([k, f]) => {
+    const q = state.quests.find(x => x.front === k && !x.completedAt && !x.locked);
+    if (!q) return `<div class="card"><span class="tag emerald">${f.icon} ${f.name}</span> <strong>Frente completado.</strong></div>`;
+    const boostXP = Math.round(q.xp * pure.mult);
+    return `<article class="card">
+      <div class="row" style="margin-bottom:6px">
+        <span class="tag" style="color:${f.color};border-color:${f.color}55">${f.icon} ${f.name}</span>
+        <div style="display:flex;gap:5px">
+          <span class="tag">⏱ ${q.minutes}m</span>
+          <span class="tag cyan">+${boostXP} XP</span>
+        </div>
+      </div>
+      <div style="font-weight:800;font-size:15px">${esc(q.title)}</div>
+      <div class="small" style="margin-top:2px">${esc(q.desc)}</div>
+      ${q.guide ? `<div class="guide-note">${esc(q.guide).replace(/\n/g, '<br>')}</div>` : ''}
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn-cyan" style="flex:1" data-done="${esc(q.id)}">✓ Completar (+${boostXP} XP)</button>
+        <button class="btn-sm" data-clock="${esc(q.id)}">⏱ ${q.minutes}m</button>
+      </div>
+    </article>`;
+  }).join('');
+
+  // 6. Dojo PL-300
+  const certOk = !!(state.certifications && state.certifications.pl300);
+  $('certBadge').className = 'tag ' + (certOk ? 'emerald' : 'amber');
+  $('certBadge').textContent = certOk ? '🗡️ DESBLOQUEADA' : '🔒 Examen Enero 2027';
+  const dm = state.goal.domains || { prep: 78, model: 30, viz: 76, admin: 55 };
+  $('domainGrid').innerHTML = [
+    { n: 'Modelado DAX', v: dm.model, c: dm.model < 65 ? 'var(--rose)' : 'var(--emerald)' },
+    { n: 'Admin & RLS', v: dm.admin, c: dm.admin < 70 ? 'var(--amber)' : 'var(--emerald)' },
+    { n: 'Visualización', v: dm.viz, c: 'var(--cyan)' },
+    { n: 'Power Query', v: dm.prep, c: 'var(--emerald)' }
+  ].map(x => `<div style="background:#050a14;padding:8px 10px;border-radius:10px;border:1px solid var(--border)">
+    <div class="row small" style="margin-bottom:4px"><span>${x.n}</span><strong style="color:${x.c}">${x.v}%</strong></div>
+    <div class="bar"><i style="width:${x.v}%;background:${x.c}"></i></div>
+  </div>`).join('');
+
+  const mast = state.goal.dojoMastered || [];
+  $('dojoCount').textContent = `${mast.length}/${QUIZ_BANK.length}`;
+  const item = QUIZ_BANK[quizIdx % QUIZ_BANK.length];
+  $('quizBox').innerHTML = `
+    <div class="row small" style="margin-bottom:4px"><span class="tag cyan">${esc(item.dom)}</span><span>#${(quizIdx % QUIZ_BANK.length) + 1}/${QUIZ_BANK.length}</span></div>
+    <div style="font-weight:700;font-size:13.5px;margin-bottom:6px">${esc(item.q)}</div>
+    <div>${item.opts.map((o, i) => `<button class="quiz-opt" data-qans="${i}">${String.fromCharCode(65 + i)}.${esc(o)}</button>`).join('')}</div>
+    <div id="qExp" class="guide-note hidden"></div>
+  `;
+
+  // 7. Biometría y Ruta
+  const g = state.goal;
+  const sorted = [...(state.body || [])].sort((a, b) => a.date.localeCompare(b.date));
+  const wPts = [{ d: g.startDate, v: Number(g.startWeight) }, ...sorted.filter(x => x.weight).map(x => ({ d: x.date, v: Number(x.weight) }))];
+  const avgPts = wPts.map((p, i) => {
+    const sl = wPts.slice(Math.max(0, i - 6), i + 1);
+    return { d: p.d, v: Number((sl.reduce((s, x) => s + x.v, 0) / sl.length).toFixed(2)) };
+  });
+  const curAvg = avgPts[avgPts.length - 1].v;
+  $('bioTitle').textContent = `Promedio 7d: ${curAvg.toFixed(1)} kg → Meta: ${g.targetWeight} kg`;
+  const lw = [...sorted].reverse().find(x => x.waist);
+  $('waistPill').textContent = lw ? `Cintura: ${lw.waist} cm` : 'Cintura: -- cm';
+
+  const W = 460, H = 95, pad = 20;
+  const ys = avgPts.map(x => x.v).concat([g.targetWeight, g.startWeight]);
+  const minY = Math.min(...ys) - 0.8, maxY = Math.max(...ys) + 0.8;
+  const X = (i, len) => pad + (W - 2 * pad) * (i / Math.max(1, len - 1));
+  const Y = v => H - pad - (H - 2 * pad) * ((v - minY) / ((maxY - minY) || 1));
+  const path = avgPts.map((p, i) => `${i ? 'L' : 'M'}${X(i, avgPts.length).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
+  const gy = Y(g.targetWeight).toFixed(1);
+  $('bioChart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:88px;background:#050a14;border-radius:10px;border:1px solid var(--border)">
+    <line x1="${pad}" y1="${gy}" x2="${W - pad}" y2="${gy}" stroke="#f59e0b" stroke-dasharray="4 4"/>
+    <path d="${path}" stroke="#10b981" stroke-width="2.5" fill="none"/>
+    ${avgPts.map((p, i) => `<circle cx="${X(i, avgPts.length).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="3.5" fill="#00e5ff"/>`).join('')}
+  </svg>`;
+
+  const flt = $('fltFront').value;
+  $('fullQuestList').innerHTML = state.quests.filter(q => flt === 'all' || q.front === flt).map(q => {
+    const f = FRONTS[q.front] || FRONTS.tech;
+    return `<div class="row" style="padding:8px 10px;background:#050a14;border:1px solid var(--border);border-radius:10px;opacity:${q.completedAt ? 0.5 : 1}">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:12.5px;${q.completedAt ? 'text-decoration:line-through' : ''}">${f.icon} ${esc(q.title)}</div>
+      </div>
+      ${q.completedAt ? `<button class="btn-sm btn-ghost" data-reopen="${esc(q.id)}">↺</button>` : `<button class="btn-sm btn-emerald" data-done="${esc(q.id)}" ${q.locked ? 'disabled' : ''}>✓</button>`}
+    </div>`;
+  }).join('');
+
+  const spent = (state.expenses || []).reduce((n, x) => n + (Number(x.amount) || 0), 0);
+  $('budgetText').textContent = `Presupuesto: S/ ${spent.toFixed(0)} / S/ 10.000`;
+  $('inGasUrl').value = localStorage.getItem(CLOUD_URL_KEY) || '';
+}
+
+// Eventos
+document.querySelectorAll('.tab').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    $(b.dataset.view).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// Botón para previsualizar las 5 evoluciones estilo Duolingo
+const cycleFn = () => {
+  previewStageOverride = previewStageOverride === null ? 0 : (previewStageOverride + 1) % 5;
+  render();
+  toast(`👁️ Vista previa: ${STAGES[previewStageOverride].badge}`);
+};
+$('btnCycleStage').addEventListener('click', cycleFn);$('relicBox').addEventListener('click', cycleFn);
+
+$('btnPureYes').addEventListener('click', () => {
+  const t = todayISO();
+  state.goal.sugarDrainDates = (state.goal.sugarDrainDates || []).filter(d => d !== t);
+  if (!state.goal.cleanDietDates.includes(t)) state.goal.cleanDietDates.push(t);
+  save();
+  toast(`🧪 ¡Pureza activa! Multiplicador ×${getPureInfo(state).mult} XP`);
+});
+
+$('btnPureNo').addEventListener('click', () => {
+  const t = todayISO();
+  state.goal.cleanDietDates = (state.goal.cleanDietDates || []).filter(d => d !== t);
+  if (!state.goal.sugarDrainDates.includes(t)) state.goal.sugarDrainDates.push(t);
+  save();
+  toast('💀 Multiplicador drenado a ×1.0 XP hoy.');
+});
+
+document.addEventListener('click', e => {
+  const doneBtn = e.target.closest('[data-done]');
+  if (doneBtn) {
+    const q = state.quests.find(x => x.id === doneBtn.dataset.done);
+    if (!q || q.locked) return;
+    const mult = getPureInfo(state).mult;
+    q.xp = Math.round(q.xp * mult);
+    q.completedAt = new Date().toISOString();
+    state.sessions.push({
+      id: `s_${Date.now()}`, title: q.title, front: q.front, date: todayISO(),
+      minutes: q.minutes || 25, kind: q.front === 'physical' ? 'exercise' : (q.front === 'maker' ? 'cad' : 'study'),
+      notes: `×${mult}`, createdAt: new Date().toISOString(), xpAwarded: 0
+    });
+    save();
+    toast(`⚔️ ¡Misión cumplida! Sangre Nocturna se fortalece (+${q.xp} XP)`);
+    return;
+  }
+
+  const reopenBtn = e.target.closest('[data-reopen]');
+  if (reopenBtn) {
+    const q = state.quests.find(x => x.id === reopenBtn.dataset.reopen);
+    if (q) { q.completedAt = null; save(); }
+    return;
+  }
+
+  const clockBtn = e.target.closest('[data-clock]');
+  if (clockBtn) {
+    const q = state.quests.find(x => x.id === clockBtn.dataset.clock);
+    if (q) { setClock(q.minutes || 20, q.title, q.front); toast(`⏱ ${q.minutes}m listos`); }
+    return;
+  }
+
+  const quickBtn = e.target.closest('[data-quick]');
+  if (quickBtn) {
+    const [kind, m] = quickBtn.dataset.quick.split('|');
+    const mins = Number(m);
+    const fMap = { reading: 'tech', study: 'tech', exercise: 'physical', cad: 'maker' };
+    state.sessions.push({
+      id: `s_${Date.now()}`, title: `Bloque ${kind}`, front: fMap[kind] || 'tech',
+      date: todayISO(), minutes: mins, kind, notes: '1 toque', createdAt: new Date().toISOString(), xpAwarded: 0
+    });
+    save();
+    toast(`🔥 +${mins} min registrados. ¡Racha encendida!`);
+  }
+});
+
+// Reloj
+let cTotal = 1200, cLeft = 1200, cInt = null, cTitle = 'Ignición Rápida', cFront = 'tech';
+function setClock(m, title = 'Ignición Rápida', front = 'tech') {
+  clearInterval(cInt); cInt = null;
+  cTotal = m * 60; cLeft = cTotal; cTitle = title; cFront = front;
+  $('clockTitle').textContent = title;
+  $('clockDigits').textContent = `${String(m).padStart(2, '0')}:00`;
+  $('btnClockToggle').textContent = '▶ Iniciar';
+  $('btnClockDone').classList.add('hidden');
+}
+document.querySelectorAll('[data-setmin]').forEach(b => b.addEventListener('click', () => setClock(Number(b.dataset.setmin))));
+$('btnClockToggle').addEventListener('click', () => {
+  if (cInt) { clearInterval(cInt); cInt = null; $('btnClockToggle').textContent = '▶'; }
+  else {
+    $('btnClockToggle').textContent = '⏸';$('btnClockDone').classList.remove('hidden');
+    cInt = setInterval(() => {
+      if (cLeft > 0) {
+        cLeft--;
+        $('clockDigits').textContent = `${String(Math.floor(cLeft / 60)).padStart(2, '0')}:${String(cLeft % 60).padStart(2, '0')}`;
+      } else { clearInterval(cInt); cInt = null; finishClock(true); }
+    }, 1000);
+  }
+});
+function finishClock(full) {
+  clearInterval(cInt); cInt = null;
+  const mins = full ? Math.round(cTotal / 60) : Math.max(5, Math.round((cTotal - cLeft) / 60));
+  state.sessions.push({
+    id: `s_${Date.now()}`, title: cTitle, front: cFront, date: todayISO(), minutes: mins,
+    kind: cFront === 'physical' ? 'exercise' : 'study', notes: 'Reloj', createdAt: new Date().toISOString(), xpAwarded: 0
+  });
+  setClock(20); save(); toast(`🔥 +${mins} min completados.`);
+}
+$('btnClockDone').addEventListener('click', () => finishClock(false));
+
+// Dojo Quiz
+$('quizBox').addEventListener('click', e => {
+  const b = e.target.closest('[data-qans]');
+  if (!b) return;
+  const ans = Number(b.dataset.qans);
+  const item = QUIZ_BANK[quizIdx % QUIZ_BANK.length];
+  $('quizBox').querySelectorAll('.quiz-opt').forEach((el, i) => {
+    el.disabled = true;
+    if (i === item.a) el.classList.add('ok');
+    else if (i === ans) el.classList.add('bad');
+  });
+  const exp = $('qExp'); exp.classList.remove('hidden');
+  if (ans === item.a) {
+    if (!state.goal.dojoMastered.includes(item.id)) { state.goal.dojoMastered.push(item.id); save(); }
+    exp.innerHTML = `<strong style="color:var(--emerald)">✓ ¡Correcto! (+10 XP)</strong> ${esc(item.exp)}`;
+  } else exp.innerHTML = `<strong style="color:var(--rose)">✗ Atención:</strong> ${esc(item.exp)}`;
+});
+$('btnNextQ').addEventListener('click', () => { quizIdx++; render(); });
+
+$('btnSaveMock').addEventListener('click', () => {
+  const v = Number($('inMock').value);
+  if (!v || v < 0 || v > 100) return toast('Ingresa un % válido.');
+  state.mocks.push({ id: `m_${Date.now()}`, date: todayISO(), pct: v, createdAt: new Date().toISOString() });
+  $('inMock').value = ''; save(); toast(`📊 Simulacro ${v}% guardado.`);
+});
+
+function openModal(title, html, fn) {
+  $('modalTitle').textContent = title; $('modalBody').innerHTML = html;
+  $('modalBg').classList.add('open'); if (fn) fn($('modalBody'));
+}
+const closeModal = () => $('modalBg').classList.remove('open');$('btnCloseModal').addEventListener('click', closeModal);
+
+$('btnApproveCert').addEventListener('click', () => {
+  const cur = !!(state.certifications && state.certifications.pl300);
+  openModal('🗡️ Despertar a Sangre Nocturna', `<p class="small">Confirma únicamente si aprobaste el examen oficial Microsoft PL-300.</p><button id="okCert" class="btn-emerald" style="width:100%">${cur ? 'Retirar aprobación' : '✓ Sí, aprobé PL-300'}</button>`, b => {
+    b.querySelector('#okCert').addEventListener('click', () => { state.certifications.pl300 = !cur; closeModal(); save(); });
+  });
+});
+
+$('btnAddBio').addEventListener('click', () => {
+  const w = $('inWeight').value ? Number($('inWeight').value) : null;
+  const f = $('inFat').value ? Number($('inFat').value) : null;
+  const c = $('inWaist').value ? Number($('inWaist').value) : null;
+  if (!w && !f && !c) return;
+  state.body.push({ id: `b_${Date.now()}`, date: todayISO(), weight: w, fat: f, waist: c, createdAt: new Date().toISOString() });
+  $('inWeight').value = ''; $('inFat').value = '';$('inWaist').value = '';
+  save(); toast('⚖️ Medición registrada.');
+});
+
+$('fltFront').addEventListener('change', render);$('btnRestDay').addEventListener('click', () => {
+  const wk = startOfWeekISO(todayISO());
+  if ((state.restDates || []).some(d => d >= wk)) return toast('Ya usaste tu descanso esta semana.');
+  state.restDates.push(todayISO()); save(); toast('🌙 Descanso activo hoy.');
+});
+
+$('btnExpenseModal').addEventListener('click', () => {
+  openModal('💰 Registrar Gasto', `<div style="display:flex;flex-direction:column;gap:8px"><select id="exF"><option value="tech">🧠 Data</option><option value="maker">🛠️ 3D</option><option value="physical">🏃 Físico</option><option value="reserve">🛡️ Reserva</option></select><input id="exN" placeholder="Concepto"><input id="exA" type="number" placeholder="Monto S/"><button id="saveEx" class="btn-cyan">Guardar</button></div>`, b => {
+    b.querySelector('#saveEx').addEventListener('click', () => {
+      const a = Number(b.querySelector('#exA').value), n = b.querySelector('#exN').value.trim();
+      if (!n || !(a > 0)) return;
+      state.expenses.push({ id: `e_${Date.now()}`, front: b.querySelector('#exF').value, name: n, amount: a, date: todayISO() });
+      closeModal(); save();
+    });
+  });
+});
+
+$('btnSync').addEventListener('click', syncNow);$('btnSaveUrl').addEventListener('click', () => {
+  const u = $('inGasUrl').value.trim();
+  if (u) { localStorage.setItem(CLOUD_URL_KEY, u); queueOps(); syncNow(); toast('☁️ Conectado.'); }
+  else { localStorage.removeItem(CLOUD_URL_KEY); render(); }
+});
+$('btnExport').addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
+  a.download = `sangre-nocturna-${todayISO()}.json`; a.click();
+});
+$('btnImport').addEventListener('click', () =>$('fileImport').click());
+$('fileImport').addEventListener('change', e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { try { state = normalizeState(JSON.parse(r.result)); save(); toast('Importado.'); } catch (err) {} }; r.readAsText(f); });$('btnReset').addEventListener('click', () => {
+  openModal('Reiniciar', `<button id="okR" class="btn-rose" style="width:100%">Confirmar reinicio</button>`, b => {
+    b.querySelector('#okR').addEventListener('click', () => { state = initialState(); closeModal(); save(); });
+  });
+});
+
+render();
+if (hasCloud()) syncNow();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "Szeth · Sangre Nocturna",
+  "short_name": "Sangre Nocturna",
+  "description": "Mando Táctico: Los Cinco Ideales",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#04070f",
+  "theme_color": "#04070f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

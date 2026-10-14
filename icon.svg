@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="48%" r="50%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#023e7d" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#04070f" stop-opacity="1"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="#04070f"/>
+  <circle cx="256" cy="256" r="230" fill="url(#g)"/>
+  <path d="M210 370 C165 320, 185 260, 222 220 C190 190, 232 150, 256 182 C288 155, 328 205, 296 256 C336 296, 312 360, 272 392 Z" fill="#020409" opacity="0.82"/>
+  <polygon points="234,64 278,64 286,94 226,94" fill="#e2e8f0"/>
+  <rect x="238" y="94" width="36" height="72" rx="6" fill="#090d16" stroke="#64748b" stroke-width="4"/>
+  <polygon points="140,178 204,154 256,162 308,154 372,178 350,196 302,178 256,210 210,178 162,196" fill="#f1f5f9"/>
+  <polygon points="256,164 270,178 256,192 242,178" fill="#0f172a"/>
+  <polygon points="234,186 278,186 278,408 256,460 234,408" fill="#03050a" stroke="#00e5ff" stroke-width="5"/>
+  <line x1="256" y1="202" x2="256" y2="438" stroke="#38bdf8" stroke-width="4" opacity="0.6"/>
+</svg>
